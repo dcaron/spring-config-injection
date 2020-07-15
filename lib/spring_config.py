@@ -102,7 +102,7 @@ def get_access_token(credentials):
 
 
 	req.add_header('Authorization', b'Basic ' + base64.b64encode(b''.join((client_id.encode(),b':',client_secret.encode()))))
-	body = "grant_type=client_credentials"
+	body = b'grant_type=client_credentials'
 	response = json.load(urllib.request.urlopen(req, data=body, **urlargs))
 	access_token = response.get('access_token')
 	token_type = response.get('token_type')
