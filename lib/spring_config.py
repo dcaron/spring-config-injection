@@ -101,7 +101,7 @@ def get_access_token(credentials):
 	req = urllib.request.Request(access_token_uri)
 
 
-	req.add_header('Authorization', 'Basic ' + base64.b64encode(b''.join((client_id.encode(),b':',client_secret.encode()))))
+	req.add_header('Authorization', b'Basic ' + base64.b64encode(b''.join((client_id.encode(),b':',client_secret.encode()))))
 	body = "grant_type=client_credentials"
 	response = json.load(urllib.request.urlopen(req, data=body, **urlargs))
 	access_token = response.get('access_token')
