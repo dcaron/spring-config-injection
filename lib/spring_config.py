@@ -70,7 +70,7 @@ def get_application_info():
 	vcap_application = json.loads(os.getenv('VCAP_APPLICATION', '{}'))
 	appinfo['name'] = vcap_application.get('application_name')
 	if appinfo['name'] == None:
-		print >> sys.stderr, "VCAP_APPLICATION must specify application_name"
+		print("VCAP_APPLICATION must specify application_name", file=sys.stderr)
 		sys.exit(1)
 	appinfo['profile'] = vcap_application.get('space_name', 'default')
 	return appinfo
@@ -110,31 +110,31 @@ def get_access_token(credentials):
 
 def get_spring_cloud_config(service, appinfo):
 	if log_level > 1:
-		print >> sys.stderr, "spring-cloud-config:"
+		print("spring-cloud-config:", file=sys.stderr)
 		json.dump(service, sys.stderr, indent=4)
-		print >> sys.stderr
+		print(file=sys.stderr)
 	credentials = service.get('credentials', {})
 	access_token = get_access_token(credentials)
 	uri = credentials.get('uri')
 	if uri is None:
-		print >> sys.stderr, "services of type spring-config-server must specify a uri"
+		print("services of type spring-config-server must specify a uri", file=sys.stderr)
 		return
 	uri += "/" + appinfo['name']
 	uri += "/" + appinfo['profile']
 	try:
 		if log_level > 1:
-			print >> sys.stderr, "GET", uri
+			print("GET", uri, file=sys.stderr)
 		req = urllib.request.Request(uri)
 		if access_token is not None:
 			req.add_header('Authorization', access_token)
 		config = json.load(urllib.request.urlopen(req, **urlargs))
 	except urllib.request.URLError as err:
-		print >> sys.stderr, err.read()
-		print >> sys.stderr, err
+		print(err.read(), file=sys.stderr)
+		print(err, file=sys.stderr)
 		return
 	if log_level > 1:
 		json.dump(config, sys.stderr, indent=4)
-		print >> sys.stderr
+		print(file=sys.stderr)
 	save_config_properties(service, config)
 
 def save_config_properties(service, config):
@@ -171,7 +171,7 @@ def save_config_properties(service, config):
 	# property appears in multiple contexts.
 	#
 	for sources in reversed(config.get('propertySources', [])):
-		for key, value in sources.get('source', {}).items():
+		for key, value in list(sources.get('source', {}).items()):
 			used = False
 			for target in targets:
 				match = re.match(target.get('filter', '.*'), key)
@@ -181,14 +181,14 @@ def save_config_properties(service, config):
 					target['properties'] = target.get('properties', {})
 					target['properties'][key] = value
 					if log_level > 1:
-						print >> sys.stderr, key, "->", target['target']
+						print(key, "->", target['target'], file=sys.stderr)
 			if not used and log_level > 0:
-				print >> sys.stderr, "Property", key, "was ignored because it did not match any target"
+				print("Property", key, "was ignored because it did not match any target", file=sys.stderr)
 	#
 	# Now iterate through the dicts and save the properties in the proper places
 	#
 	for target in targets:
-		properties = target.get('properties', {}).items()
+		properties = list(target.get('properties', {}).items())
 		if len(properties) < 1:
 			continue
 		destination = target.get('target', 'stderr')
@@ -206,7 +206,7 @@ def save_config_properties(service, config):
 			with open(filename, 'wb') as property_file:
 				write_property_file(property_file, properties, format)
 		else:
-			print >> sys.stderr, "Illegal target type", destination, "in VCAPX_CONFIG"
+			print("Illegal target type", destination, "in VCAPX_CONFIG", file=sys.stderr)
 	#
 	# And update VCAP_CONFIG to reflect downloaded properties
 	#
@@ -217,14 +217,15 @@ def write_property_file(file, properties, format):
 	if format == 'json':
 		json.dump(properties, file, indent=4)
 	elif format == 'yml':
-		print >> file, '---'
+		print('---', file=file)
 		for key, value in properties:
-			print >> file, key, value
+			print(key, value, file=file)
 	elif format in [ 'properties', 'text' ]:
 		for key, value in properties:
-			print >> file, key + '=' + value
+			print(key + '=' + value, file=file)
+			# print(key + '=' + value, file=<output_stream>)
 	else:
-		print >> sys.stderr, "Illegal format", format, "in VCAPX_CONFIG"
+		print("Illegal format", format, "in VCAPX_CONFIG", file=sys.stderr)
 
 def add_environment_variable(key, value):
 	#
@@ -234,8 +235,7 @@ def add_environment_variable(key, value):
 	# export the real environment variables. We simply place them on our
 	# stdout for the caller to consume.
 	#
-    print(key, value)
-
+	print(key, value)
 
 if __name__ == "__main__":
 	main()
