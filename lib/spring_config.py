@@ -18,7 +18,7 @@ import os
 import re
 import sys
 import json
-import urllib2
+import urllib.request
 import base64
 import ssl
 
@@ -98,10 +98,10 @@ def get_access_token(credentials):
 	access_token_uri = credentials.get('access_token_uri')
 	if access_token_uri is None:
 		return None
-	req = urllib2.Request(access_token_uri)
+	req = urllib.request.Request(access_token_uri)
 	req.add_header('Authorization', 'Basic ' + base64.b64encode(client_id + ":" + client_secret))
 	body = "grant_type=client_credentials"
-	response = json.load(urllib2.urlopen(req, data=body, **urlargs))
+	response = json.load(urllib.request.urlopen(req, data=body, **urlargs))
 	access_token = response.get('access_token')
 	token_type = response.get('token_type')
 	return token_type + " " + access_token
@@ -122,11 +122,11 @@ def get_spring_cloud_config(service, appinfo):
 	try:
 		if log_level > 1:
 			print >> sys.stderr, "GET", uri
-		req = urllib2.Request(uri)
+		req = urllib.request.Request(uri)
 		if access_token is not None:
 			req.add_header('Authorization', access_token)
-		config = json.load(urllib2.urlopen(req, **urlargs))
-	except urllib2.URLError as err:
+		config = json.load(urllib.request.urlopen(req, **urlargs))
+	except urllib.request.URLError as err:
 		print >> sys.stderr, err.read()
 		print >> sys.stderr, err
 		return
