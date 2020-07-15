@@ -44,7 +44,7 @@ def detect():
 	service = find_spring_config_service(appinfo)
 	if service == None:
 		sys.exit(1)
-	print 'spring-config'
+	print('spring-config')
 
 vcap_config = None
 log_level = 1
@@ -232,7 +232,8 @@ def add_environment_variable(key, value):
 	# export the real environment variables. We simply place them on our
 	# stdout for the caller to consume.
 	#
-	print key, value
+    print(key, value)
+
 
 if __name__ == "__main__":
 	main()
