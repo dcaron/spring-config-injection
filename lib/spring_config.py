@@ -107,7 +107,7 @@ def get_access_token(credentials):
 	return token_type + " " + access_token
 
 def get_spring_cloud_config(service, appinfo):
-	if log_level > 1:
+	if int(log_level) > 1:
 		print("spring-cloud-config:", file=sys.stderr)
 		json.dump(service, sys.stderr, indent=4)
 		print(file=sys.stderr)
@@ -120,7 +120,7 @@ def get_spring_cloud_config(service, appinfo):
 	uri += "/" + appinfo['name']
 	uri += "/" + appinfo['profile']
 	try:
-		if log_level > 1:
+		if int(log_level) > 1:
 			print("GET", uri, file=sys.stderr)
 		req = urllib.request.Request(uri)
 		if access_token is not None:
@@ -130,7 +130,7 @@ def get_spring_cloud_config(service, appinfo):
 		print(err.read(), file=sys.stderr)
 		print(err, file=sys.stderr)
 		return
-	if log_level > 1:
+	if int(log_level) > 1:
 		json.dump(config, sys.stderr, indent=4)
 		print(file=sys.stderr)
 	save_config_properties(service, config)
@@ -178,9 +178,9 @@ def save_config_properties(service, config):
 					target['target'] = target.get('target', 'stderr')
 					target['properties'] = target.get('properties', {})
 					target['properties'][key] = value
-					if log_level > 1:
+					if int(log_level) > 1:
 						print(key, "->", target['target'], file=sys.stderr)
-			if not used and log_level > 0:
+			if not used and int(log_level) > 0:
 				print("Property", key, "was ignored because it did not match any target", file=sys.stderr)
 	#
 	# Now iterate through the dicts and save the properties in the proper places
