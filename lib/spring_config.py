@@ -18,7 +18,7 @@ import os
 import re
 import sys
 import json
-import urllib.request
+import urllib.request, urllib.error, urllib.parse
 import base64
 import ssl
 
@@ -99,10 +99,8 @@ def get_access_token(credentials):
 	if access_token_uri is None:
 		return None
 	req = urllib.request.Request(access_token_uri)
-
-
-	req.add_header('Authorization', b'Basic ' + base64.b64encode(b''.join((client_id.encode(),b':',client_secret.encode()))))
-	body = b'grant_type=client_credentials'
+	req.add_header('Authorization', 'Basic ' + base64.b64encode(client_id + ":" + client_secret))
+	body = "grant_type=client_credentials"
 	response = json.load(urllib.request.urlopen(req, data=body, **urlargs))
 	access_token = response.get('access_token')
 	token_type = response.get('token_type')
@@ -128,7 +126,7 @@ def get_spring_cloud_config(service, appinfo):
 		if access_token is not None:
 			req.add_header('Authorization', access_token)
 		config = json.load(urllib.request.urlopen(req, **urlargs))
-	except urllib.request.URLError as err:
+	except urllib.error.URLError as err:
 		print(err.read(), file=sys.stderr)
 		print(err, file=sys.stderr)
 		return
@@ -223,7 +221,6 @@ def write_property_file(file, properties, format):
 	elif format in [ 'properties', 'text' ]:
 		for key, value in properties:
 			print(key + '=' + value, file=file)
-			# print(key + '=' + value, file=<output_stream>)
 	else:
 		print("Illegal format", format, "in VCAPX_CONFIG", file=sys.stderr)
 
