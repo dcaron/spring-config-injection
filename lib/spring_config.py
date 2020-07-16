@@ -224,7 +224,7 @@ def write_property_file(file, properties, format):
 			print(key, value, file=file)
 	elif format in [ 'properties', 'text' ]:
 		for key, value in properties:
-			print(key + '=' + value, file=file)
+			print(key.encode() + b'=' + value.encode(), file=file)
 	else:
 		print("Illegal format", format, "in VCAPX_CONFIG", file=sys.stderr)
 
