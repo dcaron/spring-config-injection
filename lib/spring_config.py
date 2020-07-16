@@ -93,18 +93,22 @@ def find_spring_config_service(appinfo):
 	return None
 
 def get_access_token(credentials):
-	client_id = credentials.get('client_id','')
-	client_secret = credentials.get('client_secret','')
 	access_token_uri = credentials.get('access_token_uri')
 	if access_token_uri is None:
 		return None
 	req = urllib.request.Request(access_token_uri)
-	req.add_header('Authorization', 'Basic ' + base64.b64encode(client_id + ":" + client_secret))
+	req.add_header('Authorization', createAuthHeader(credentials))
 	body = "grant_type=client_credentials"
 	response = json.load(urllib.request.urlopen(req, data=body, **urlargs))
 	access_token = response.get('access_token')
 	token_type = response.get('token_type')
 	return token_type + " " + access_token
+
+def createAuthHeader(credentials):
+	client_id = credentials.get('client_id','')
+	client_secret = credentials.get('client_secret','')
+	client = client_id + ":" + client_secret
+	return b'Basic ' + base64.b64encode(client.encode())
 
 def get_spring_cloud_config(service, appinfo):
 	if int(log_level) > 1:
